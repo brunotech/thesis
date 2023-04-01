@@ -8,18 +8,20 @@ from discopy.tensor import *
 from discopy.drawing import *
 
 
+
+
 class Qubits(Ty):
-    __str__ = lambda self: "qubit ** {}".format(len(self))
+    __str__ = lambda self: f"qubit ** {len(self)}"
+
 
 qubit = Qubits('1')
 
 class Circuit(Diagram): pass
-
 class Gate(Box, Circuit): pass
 
 class Bra(Box, Circuit):
     def __init__(self, *bits: bool):
-        name = "Bra({})".format(', '.join(map(str, bits)))
+        name = f"Bra({', '.join(map(str, bits))})"
         self.bits, dom, cod = bits, qubit ** len(bits), qubit ** 0
         Box.__init__(self, name, dom, cod)
 
@@ -27,7 +29,7 @@ class Bra(Box, Circuit):
 
 class Ket(Box, Circuit):
     def __init__(self, *bits: bool):
-        name = "Ket({})".format(', '.join(map(str, bits)))
+        name = f"Ket({', '.join(map(str, bits))})"
         self.bits, dom, cod = bits, qubit ** 0, qubit ** len(bits)
         Box.__init__(self, name, dom, cod)
 

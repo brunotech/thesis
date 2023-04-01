@@ -8,13 +8,12 @@ from discopy.sugar import dataclass, inductive, Tensorable
 class Ty(Ob):
     def __init__(self, inside: Optional[tuple[Ob | str, ...]] = ()):
         self.inside = tuple(x if isinstance(x, Ob) else Ob(x) for x in inside)
-        name = ' @ '.join(map(str, inside)) if inside\
-            else "{}()".format(type(self).__name__)
+        name = ' @ '.join(map(str, inside)) if inside else f"{type(self).__name__}()"
         super().__init__(name)
 
     def tensor(self, *others: Ty) -> Ty:
         if all(isinstance(other, Ty) for other in others):
-            inside = self.inside + sum([other.inside for other in others], ())
+            inside = self.inside + sum((other.inside for other in others), ())
             return self.cast(inside)
         return NotImplemented  # This will allow whiskering on the left.
 
@@ -35,8 +34,11 @@ class Ty(Ob):
 class Layer(cat.Box):
     def __init__(self, left: Ty, box: Box, right: Ty):
         self.left, self.box, self.right = left, box, right
-        name = ("{} @ ".format(left) if left else "") + box.name\
-            + (" @ {}".format(right) if right else "")
+        name = (
+            (f"{left} @ " if left else "")
+            + box.name
+            + (f" @ {right}" if right else "")
+        )
         dom, cod = left @ box.dom @ right, left @ box.cod @ right
         super().__init__(name, dom, cod)
 
@@ -156,12 +158,12 @@ class Functor(cat.Functor):
 
     def __call__(self, other : Ty | Diagram) -> Ty | Diagram:
         if isinstance(other, Ty):
-            return sum([self(obj) for obj in other.inside], self.cod.ob())
+            return sum((self(obj) for obj in other.inside), self.cod.ob())
         if isinstance(other, Ob):
             result = self.ob[self.dom.ob((other, ))]
             dtype = getattr(self.cod.ob, "__origin__", self.cod.ob)
             return result if isinstance(result, dtype)\
-                else self.cod.ob((result, ))  # Syntactic sugar for {x: n}.
+                    else self.cod.ob((result, ))  # Syntactic sugar for {x: n}.
         if isinstance(other, Layer):
             return self(other.left) @ self(other.box) @ self(other.right)
         return super().__call__(other)

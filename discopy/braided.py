@@ -20,8 +20,11 @@ class Box(monoidal.Box, Diagram):
 class Braid(Box):
     def __init__(self, x: Ty, y: Ty, is_dagger=False):
         assert len(x) == len(y) == 1
-        name = "{}({}, {})[::-1]".format(type(self), y, x)\
-            if is_dagger else "{}({}, {})".format(type(self), x, y)
+        name = (
+            f"{type(self)}({y}, {x})[::-1]"
+            if is_dagger
+            else f"{type(self)}({x}, {y})"
+        )
         super().__init__(name, x @ y, y @ x, is_dagger=is_dagger)
 
     def dagger(self): return Braid(*self.cod, is_dagger=not self.is_dagger)
@@ -45,8 +48,7 @@ def naturality(self: Diagram, i: int, left=True, down=True, braid=None):
     if left and down:
         source = layer.left[-1] @ box >> braid(layer.left[-1], box.cod)
         target = braid(layer.left[-1], box.dom) >> box @ layer.left[-1]
-    elif left: ...
-    elif down: ...
+    elif left or down: ...
     else:
         source = braid(layer.right[0], box.dom) >> box @ layer.right[0]
         target = layer.right[0] @ box >> braid(layer.right[0], box.cod)

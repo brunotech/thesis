@@ -24,9 +24,9 @@ class Dict(Composable, Tensorable):
 
     @inductive
     def tensor(self, other: Dict) -> Dict:
-        inside = {i: self[i] for i in range(self.cod)}
-        inside.update({
-            self.cod + i: self.dom + other[i] for i in range(other.cod)})
+        inside = {i: self[i] for i in range(self.cod)} | {
+            self.cod + i: self.dom + other[i] for i in range(other.cod)
+        }
         return Dict(inside, self.dom + other.dom, self.cod + other.cod)
 
     @staticmethod
@@ -68,7 +68,7 @@ def test_neural_network():
     x = Ty('x')
     add = lambda n: Box('$+$', x ** n, x)
     ReLU = Box('$\\sigma$', x, x)
-    weights = [Box('w{}'.format(i), x, x) for i in range(4)]
+    weights = [Box(f'w{i}', x, x) for i in range(4)]
     bias = Box('b', Ty(), x)
 
     network = Diagram.copy(x @ x, 2)\

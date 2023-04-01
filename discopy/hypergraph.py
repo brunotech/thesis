@@ -7,7 +7,7 @@ class Spider(Box):
     def __init__(self, a: int, b: int, x: Ty, phase=None):
         assert len(x) == 1
         self.object, self.phase = x, phase or 0
-        name = "Spider({})".format(', '.join(map(str, (a, b, x, phase))))
+        name = f"Spider({', '.join(map(str, (a, b, x, phase)))})"
         super().__init__(name, dom=x ** a, cod=x ** b)
 
     def dagger(self):

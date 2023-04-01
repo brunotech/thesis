@@ -12,7 +12,7 @@ class Box(symmetric.Box, Diagram):
 
 class Trace(Box):
     def __init__(self, diagram: Diagram, n=1):
-        self.diagram, name = diagram, "Trace({}, {})".format(diagram, n)
+        self.diagram, name = diagram, f"Trace({diagram}, {n})"
         super().__init__(name, diagram.dom[:-n], diagram.cod[:-n])
 
 class Functor(symmetric.Functor):

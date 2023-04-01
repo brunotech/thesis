@@ -7,7 +7,7 @@ def dataclass(cls):
 
 
 def product(x, unit=1):
-    return unit if not x else product(x[1:], x[0] * unit)
+    return product(x[1:], x[0] * unit) if x else unit
 
 
 def inductive(method):

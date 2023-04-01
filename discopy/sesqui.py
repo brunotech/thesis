@@ -103,7 +103,7 @@ Cat = TwoCategory(colours=Category, ob=Functor, ar=Transformation)
 class Slice(monoidal.Box):
     def __init__(self, rule: Rule, match: Match):
         dom, cod = match.subs(rule.dom), match.subs(rule.cod)
-        super().__init__("Slice({}, {})".format(rule, match), dom, cod)
+        super().__init__(f"Slice({rule}, {match})", dom, cod)
 
     @classmethod
     def cast(cls, old: Rule) -> Slice:

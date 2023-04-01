@@ -6,9 +6,12 @@ def test_Kauffman():
     Ty.l = Ty.r = property(lambda self: self)
     x, A = Ty('x'), Box('A', Ty(), Ty())
 
+
+
     class Polynomial(Diagram):
-        def braid(x, y):
-            return (A @ x @ y) + (Cup(x, y) >> A.dagger() >> Cap(x, y))
+        def braid(self, y):
+            return A @ self @ y + (Cup(self, y) >> A.dagger() >> Cap(self, y))
+
 
     Kauffman = Functor(ob={x: x}, ar={}, cod=Category(Ty, Polynomial))
 

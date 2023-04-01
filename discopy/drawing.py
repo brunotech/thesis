@@ -38,17 +38,16 @@ def make_space(pos: Embedding, scan: list[Node], box: Box, off: int
     if not scan:
         return pos, 0
     half_width = len(box.cod[:-1]) / 2 + 1
-    if not box.dom:
-        if not off:
-            x_pos = pos[scan[0]][0] - half_width
-        elif off == len(scan):
-            x_pos = pos[scan[-1]][0] + half_width
-        else:
-            right = pos[scan[off + len(box.dom)]][0]
-            x_pos = (pos[scan[off - 1]][0] + right) / 2
-    else:
+    if box.dom:
         right = pos[scan[off + len(box.dom) - 1]][0]
         x_pos = (pos[scan[off]][0] + right) / 2
+    elif not off:
+        x_pos = pos[scan[0]][0] - half_width
+    elif off == len(scan):
+        x_pos = pos[scan[-1]][0] + half_width
+    else:
+        right = pos[scan[off + len(box.dom)]][0]
+        x_pos = (pos[scan[off - 1]][0] + right) / 2
     if off and pos[scan[off - 1]][0] > x_pos - half_width:
         limit = pos[scan[off - 1]][0]
         pad = limit - x_pos + half_width

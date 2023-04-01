@@ -17,9 +17,13 @@ class Ob(cat.Ob):
         return old if isinstance(old, cls) else cls(str(old), z=0)
 
     def __str__(self):
-        return str(self.r) + '.l' if self.z < 0\
-            else str(self.l) + '.r' if self.z > 0\
+        return (
+            f'{str(self.r)}.l'
+            if self.z < 0
+            else f'{str(self.l)}.r'
+            if self.z > 0
             else self.name
+        )
 
 
 class Ty(monoidal.Ty, Ob):
@@ -61,12 +65,12 @@ class Box(monoidal.Box, Diagram):
 class Cup(Box):
     def __init__(self, x: Ty, y: Ty):
         assert len(x) == 1 and x == y.l
-        super().__init__("Cup({}, {})".format(repr(x), repr(y)), x @ y, x[:0])
+        super().__init__(f"Cup({repr(x)}, {repr(y)})", x @ y, x[:0])
 
 class Cap(Box):
     def __init__(self, x: Ty, y: Ty):
         assert len(x) == 1 and x.l == y
-        super().__init__("Cap({}, {})".format(repr(x), repr(y)), x[:0], x @ y)
+        super().__init__(f"Cap({repr(x)}, {repr(y)})", x[:0], x @ y)
 
 
 def nesting(factory):

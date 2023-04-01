@@ -14,10 +14,10 @@ class Matrix(Composable, Tensorable):
     inside: list[list[dtype]]
 
     def __class_getitem__(cls, dtype: type):
+
         class C(cls): pass
         C.dtype = dtype
-        C.__name__ = C.__qualname__ = "{}[{}]".format(
-            cls.__name__, dtype.__name__)
+        C.__name__ = C.__qualname__ = f"{cls.__name__}[{dtype.__name__}]"
         return C
 
     def __init__(self, inside: list[list[dtype]], dom: int, cod: int):
@@ -25,10 +25,12 @@ class Matrix(Composable, Tensorable):
             [list(map(self.dtype, row)) for row in inside], dom, cod
 
     def __eq__(self, other):
-        if not isinstance(other, Matrix):
-            return self.dom == self.cod == 1 and self.inside[0][0] == other
-        return (self.dtype, self.inside, self.dom, self.cod)\
+        return (
+            (self.dtype, self.inside, self.dom, self.cod)
             == (other.dtype, other.inside, other.dom, other.cod)
+            if isinstance(other, Matrix)
+            else self.dom == self.cod == 1 and self.inside[0][0] == other
+        )
 
     def is_close(self, other):
         if not isinstance(other, Matrix):

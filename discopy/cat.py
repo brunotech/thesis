@@ -35,7 +35,7 @@ class Arrow(Composable):
             return self.sum.cast(self).then(*others)
         for f, g in zip((self, ) + others, others): assert f.cod == g.dom
         dom, cod = self.dom, others[-1].cod if others else self.cod
-        inside = self.inside + sum([other.inside for other in others], ())
+        inside = self.inside + sum((other.inside for other in others), ())
         return self.cast(Arrow(inside, dom, cod))
 
     def dagger(self):
@@ -43,21 +43,21 @@ class Arrow(Composable):
         return self.cast(Arrow(inside, self.cod, self.dom))
 
     def __getitem__(self, key: int | slice) -> Arrow:
-        if isinstance(key, slice):
-            if key.step == -1:
-                inside = tuple(box.dagger() for box in self.inside[key])
-                return self.cast(Arrow(inside, self.cod, self.dom))
-            if (key.step or 1) != 1:
-                raise IndexError
-            inside = self.inside[key]
-            if not inside:
-                if (key.start or 0) >= len(self):
-                    return self.id(self.cod)
-                if (key.start or 0) <= -len(self):
-                    return self.id(self.dom)
-                return self.id(self.inside[key.start or 0].dom)
-            return self.cast(Arrow(inside, inside[0].dom, inside[-1].cod))
-        return self.inside[key]
+        if not isinstance(key, slice):
+            return self.inside[key]
+        if key.step == -1:
+            inside = tuple(box.dagger() for box in self.inside[key])
+            return self.cast(Arrow(inside, self.cod, self.dom))
+        if (key.step or 1) != 1:
+            raise IndexError
+        inside = self.inside[key]
+        if not inside:
+            if (key.start or 0) >= len(self):
+                return self.id(self.cod)
+            if (key.start or 0) <= -len(self):
+                return self.id(self.dom)
+            return self.id(self.inside[key.start or 0].dom)
+        return self.cast(Arrow(inside, inside[0].dom, inside[-1].cod))
 
     @classmethod
     def zero(cls, dom: Ob, cod: Ob) -> Arrow:
@@ -92,7 +92,7 @@ class Box(Arrow):
 
     def __repr__(self):
         if self.is_dagger:
-            return repr(self.dagger()) + ".dagger()"
+            return f"{repr(self.dagger())}.dagger()"
         return "Box({}, {}, {})".format(*map(repr, (
             self.name, self.dom, self.cod)))
 
@@ -121,11 +121,11 @@ class Functor(Composable):
     def __call__(self, other: Ob | Arrow) -> Ob | Arrow:
         if isinstance(other, Sum):
             unit = self.cod.ar.zero(self(other.dom), self(other.cod))
-            return sum([self(f) for f in other.terms], unit)
+            return sum((self(f) for f in other.terms), unit)
         if isinstance(other, Bubble):
             method = getattr(self.cod.ar, other.method)
             return method(self(other.diagram)) if other.is_id_on_objects else\
-                method(self(other.diagram), self(other.dom), self(other.cod))
+                    method(self(other.diagram), self(other.dom), self(other.cod))
         if isinstance(other, Ob): return self.ob[other]
         if isinstance(other, Box) and other.is_dagger:
             return self(other.dagger()).dagger()
@@ -153,8 +153,7 @@ class Functor(Composable):
 class Sum(Box):
     def __init__(self, terms: tuple[Arrow, ...], dom: Ob, cod: Ob):
         assert all(f.dom == dom and f.cod == cod for f in terms)
-        self.terms, name = terms, "Sum({}, {}, [{}])".format(
-            dom, cod, ", ".join(map(str, terms)))
+        self.terms, name = terms, f'Sum({dom}, {cod}, [{", ".join(map(str, terms))}])'
         Box.__init__(self, name, dom, cod)
 
     def __eq__(self, other):
@@ -164,8 +163,11 @@ class Sum(Box):
         return self.terms == (other, )
 
     def __add__(self, other):
-        if not isinstance(other, Sum): return self + self.cast(other)
-        return self.sum(self.terms + other.terms, self.dom, self.cod)
+        return (
+            self.sum(self.terms + other.terms, self.dom, self.cod)
+            if isinstance(other, Sum)
+            else self + self.cast(other)
+        )
 
     @classmethod
     def cast(cls, old: cat.Arrow) -> Sum:
@@ -188,7 +190,7 @@ class Bubble(Box):
     def __init__(self, diagram: Arrow, dom=None, cod=None, **params):
         self.diagram = diagram
         self.method = params.pop("method", type(self).method)
-        name = "Bubble({}, {}, {})".format(diagram, dom, cod)
+        name = f"Bubble({diagram}, {dom}, {cod})"
         dom, cod = dom or diagram.dom, cod or diagram.cod
         super().__init__(name, dom, cod, **params)
 

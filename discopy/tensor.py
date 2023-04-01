@@ -56,10 +56,19 @@ class Tensor(Matrix):
     @classmethod
     def spider(cls, a: int, b: int, n: int, phase=None) -> Tensor:
         phase = phase or n * [1]
-        inside = [[sum(phase)]] if not a and not b\
-            else [[phase[xs[0]] for xs in itertools.product(*b * [range(n)])
-                   if all(x == xs[0] for x in xs)]]\
-            if not a else cls.spider([], a + b, n).inside
+        inside = (
+            [[sum(phase)]]
+            if not a and not b
+            else cls.spider([], a + b, n).inside
+            if a
+            else [
+                [
+                    phase[xs[0]]
+                    for xs in itertools.product(*b * [range(n)])
+                    if all(x == xs[0] for x in xs)
+                ]
+            ]
+        )
         return cls(inside, dom=a * [n], cod=b * [n])
 
     braid = swap

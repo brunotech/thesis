@@ -29,12 +29,16 @@ class Exp(Ty):
         repr(self.base), repr(self.exponent))
 
 class Over(Exp):
-    __str__ = lambda self: "({} << {})".format(self.base, self.exponent)
+    __str__ = lambda self: f"({self.base} << {self.exponent})"
     __repr__ = lambda self: super().__repr__().replace("Exp", "Over")
 
+
+
+
 class Under(Exp):
-    __str__ = lambda self: "({} >> {})".format(self.exponent, self.base)
+    __str__ = lambda self: f"({self.exponent} >> {self.base})"
     __repr__ = lambda self: super().__repr__().replace("Exp", "Under")
+
 
 Ty.__lshift__ = lambda self, other: Over(self, other)
 Ty.__rshift__ = lambda self, other: Under(other, self)
@@ -59,13 +63,13 @@ class Ev(Box):
         self.base, self.exponent = x.base, x.exponent
         self.left = isinstance(x, Over)
         dom, cod = (x @ self.exponent, self.base) if self.left\
-            else (self.exponent @ x, self.base)
-        super().__init__("Ev" + str(x), dom, cod)
+                else (self.exponent @ x, self.base)
+        super().__init__(f"Ev{str(x)}", dom, cod)
 
 class Curry(Box):
     def __init__(self, diagram: Diagram, n=1, left=True):
         self.diagram, self.n, self.left = diagram, n, left
-        name = "Curry({}, {}, {})".format(diagram, n, left)
+        name = f"Curry({diagram}, {n}, {left})"
         if left:
             dom = diagram.dom[:len(diagram.dom) - n]
             cod = diagram.cod << diagram.dom[len(diagram.dom) - n:]

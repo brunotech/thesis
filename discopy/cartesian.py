@@ -24,7 +24,7 @@ Diagram.swap = Diagram.braid = hexagon(Swap)
 class Copy(Box):
     def __init__(self, x: Ty, n: int = 2):
         assert len(x) == 1
-        super().__init__(name="Copy({}, {})".format(x, n), dom=x, cod=x ** n)
+        super().__init__(name=f"Copy({x}, {n})", dom=x, cod=x ** n)
 
 class Functor(symmetric.Functor):
     dom = cod = Category(Ty, Diagram)
